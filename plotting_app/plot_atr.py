@@ -1,6 +1,8 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+import matplotlib.gridspec as gridspec
 
 # Streamlit 页面标题和描述
 st.title('ATR 计算与可视化')
@@ -23,30 +25,46 @@ if uploaded_file is not None:
     time_period = 14
 
     # 计算 ATR
-    data['ATR'] = data['TrueRange'].rolling(window=time_period).mean()
+    data['ATR'] = data['TrueRange'].rolling(window=time_period).mean().apply(lambda x :round(x,2))
+    data['MaxTR'] = data['TrueRange'].rolling(window=time_period).max().apply(lambda x :round(x,2))
+    data['MaxATR'] = round((data['ATR']+data['MaxTR'])/2,2)
+    data['MinTR'] = data['TrueRange'].rolling(window=time_period).min().apply(lambda x :round(x,2))
+    # Convert 'Date' column to datetime format
+    data['Date'] = pd.to_datetime(data['Date'], format='%Y%m%d')
 
-    # 创建图表
-    fig, ax1 = plt.subplots(figsize=(10, 6))
+    # 创建图表和子图网格
+    fig = plt.figure(figsize=(10, 8))
+    gs = gridspec.GridSpec(2, 1, height_ratios=[2, 1])  # 两个子图，高度比例为2:1
 
-    # 绘制收盘价到第一个轴
-    ax1.plot(data['Close'], label='Close Price', color='blue')
-    ax1.set_xlabel('Time')
+    # 第一个子图：Close Price
+    ax1 = plt.subplot(gs[0])
+    ax1.plot(data['Date'], data['Close'], label='Close Price', color='blue')
     ax1.set_ylabel('Close Price', color='blue')
+    ax1.legend(loc='upper left')  # 添加图例
 
-    # 创建第二个轴用于 ATR
-    ax2 = ax1.twinx()
-    ax2.plot(data['ATR'], label='ATR', color='red', linestyle='--')
-    ax2.set_ylabel('ATR', color='red')
+    # 第二个子图：ATR 和 True Range
+    ax2 = plt.subplot(gs[1], sharex=ax1)  # 共享x轴
+    ax2.plot(data['Date'], data['ATR'], label='ATR', color='red', linestyle='--')
+    ax2.plot(data['Date'], data['MaxATR'], label='30% chance', color='yellow', linestyle='--')
+    ax2.plot(data['Date'], data['MaxTR'], label='maxTR', color='orange', linestyle='--')
+    ax2.plot(data['Date'], data['MinTR'], label='minTR', color='blue', linestyle='--')
+    ax2.set_ylabel('ATR and TR', color='black')
+    ax2.set_xlabel('Time')
+    ax2.legend(loc='upper left')  # 添加图例
+    # 在每条线的最后一个数据点上添加注释
+    for series in [data['ATR'], data['MaxATR'], data['MaxTR'], data['MinTR']]:
+        ax2.annotate(str(series.iloc[-1]), xy=(mdates.date2num(data['Date'].iloc[-1]), series.iloc[-1]),
+                    xytext=(0, -5), textcoords='offset points')
+        
+    # 设置 x 轴的日期格式为 'YYYYMMDD'
+    ax1.xaxis.set_major_formatter(mdates.DateFormatter('%Y%m%d'))
 
-    # 添加图例
-    lines_1, labels_1 = ax1.get_legend_handles_labels()
-    lines_2, labels_2 = ax2.get_legend_handles_labels()
-    lines = lines_1 + lines_2
-    labels = labels_1 + labels_2
-    ax1.legend(lines, labels, loc='upper left')
+    plt.tight_layout()
+    plt.show()
 
     # 显示图表在 Streamlit 页面上
     st.pyplot(fig)
+    
 
     # 将结果输出到新的 CSV 文件
     st.write('生成的数据:')
