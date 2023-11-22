@@ -100,21 +100,21 @@ if uploaded_file is not None:
     st.write('輸入的數據:')
     st.write(data)  # 显示生成的数据
 else:
-    '''
-    import streamlit as st
-    import os
+    
+    #import streamlit as st
+    #import os
 
     # Everything is accessible via the st.secrets dict:
-    st.write("DB username:", st.secrets["db_username"])
-    st.write("DB password:", st.secrets["db_password"])
+    #st.write("DB username:", st.secrets["db_username"])
+    #st.write("DB password:", st.secrets["db_password"])
     
 
     # And the root-level secrets are also accessible as environment variables:
-    st.write(
-        "Has environment variables been set:",
-        os.environ["db_username"] == st.secrets["db_username"],
-    )
-    '''
+    #st.write(
+    #    "Has environment variables been set:",
+    #    os.environ["db_username"] == st.secrets["db_username"],
+    #)
+    
     import pymysql
     from sqlalchemy import create_engine
 
