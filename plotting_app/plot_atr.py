@@ -3,7 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import matplotlib.gridspec as gridspec
-
+from mplfinance.original_flavor import candlestick_ohlc
 # Streamlit 页面标题和描述
 st.title('ATR計算與視覺化')
 # ======================================================= download ==========
@@ -12,7 +12,10 @@ import base64
 sample_data = {'Date': ['20230703'],'Open': [673],'High': [709],'Low': [673],'Close': [709]}
 sample_df = pd.DataFrame(sample_data)
 # Displaying the sample DataFrame
-st.write("輸入範例，不可包含中文，日期可吃 20231122 or 2023/11/22:")
+st.write("""
+         輸入限csv檔，內文、檔名不可包含中文，日期可吃 20231122 or 2023/11/22:
+         \n=> 可從統一金贏島輸出EXCEL後，將數值貼到下載之範例檔再上傳
+         """)
 st.write(sample_df)
 
 # Create a link for users to download the sample CSV file
@@ -58,11 +61,11 @@ if uploaded_file is not None:
     fig = plt.figure(figsize=(10, 8))
     gs = gridspec.GridSpec(2, 1, height_ratios=[2, 1])  # 两个子图，高度比例为2:1
 
-    # 第一个子图：Close Price
+    # 第一个子图：Candlestick Chart
     ax1 = plt.subplot(gs[0])
-    ax1.plot(data['Date'], data['Close'], label='Close Price', color='blue')
-    ax1.set_ylabel('Close Price', color='blue')
-    ax1.legend(loc='upper left')  # 添加图例
+    candlestick_ohlc(ax1, zip(mdates.date2num(data['Date']), data['Open'], data['High'], data['Low'], data['Close']), width=0.6,colorup='red', colordown='green')
+    ax1.set_ylabel('Price')
+    ax1.legend(['Candlestick'], loc='upper left')  # 添加图例
 
     # 第二个子图：ATR 和 True Range
     ax2 = plt.subplot(gs[1], sharex=ax1)  # 共享x轴
