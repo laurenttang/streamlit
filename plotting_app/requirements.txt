@@ -1,3 +1,2 @@
 matplotlib
 mplfinance
-base64
