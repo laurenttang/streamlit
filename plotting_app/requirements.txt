@@ -1,2 +1,4 @@
 matplotlib
 mplfinance
+pymysql
+sqlalchemy
