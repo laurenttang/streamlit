@@ -100,6 +100,7 @@ if uploaded_file is not None:
     st.write('輸入的數據:')
     st.write(data)  # 显示生成的数据
 else:
+    '''
     import streamlit as st
     import os
 
@@ -113,6 +114,7 @@ else:
         "Has environment variables been set:",
         os.environ["db_username"] == st.secrets["db_username"],
     )
+    '''
     import pymysql
     from sqlalchemy import create_engine
 
