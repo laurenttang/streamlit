@@ -5,8 +5,26 @@ import matplotlib.dates as mdates
 import matplotlib.gridspec as gridspec
 
 # Streamlit 页面标题和描述
-st.title('ATR 计算与可视化')
-st.write('上传你的 CSV 文件，并生成收盘价和 ATR 的时间序列线图')
+st.title('ATR計算與視覺化')
+# ======================================================= download ==========
+import base64
+# Creating a sample DataFrame
+sample_data = {'Date': ['20230703'],'Open': [673],'High': [709],'Low': [673],'Close': [709]}
+sample_df = pd.DataFrame(sample_data)
+# Displaying the sample DataFrame
+st.write("輸入範例，不可包含中文，日期可吃 20231122 or 2023/11/22:")
+st.write(sample_df)
+
+# Create a link for users to download the sample CSV file
+def download_sample_csv():
+    csv = sample_df.to_csv(index=False)
+    b64 = base64.b64encode(csv.encode()).decode()
+    href = f'<a href="data:file/csv;base64,{b64}" download="sample_data.csv">Download Sample CSV File</a>'
+    return href
+st.markdown(download_sample_csv(), unsafe_allow_html=True)
+# ======================================================= END ==========
+st.write('上傳您的CSV文件，並產生收盤價和ATR的時間序列線圖')
+
 
 # 通过 Streamlit 提供的文件上传功能上传 CSV 文件
 uploaded_file = st.file_uploader("上传 CSV 文件", type=['csv'])
@@ -29,8 +47,12 @@ if uploaded_file is not None:
     data['MaxTR'] = data['TrueRange'].rolling(window=time_period).max().apply(lambda x :round(x,2))
     data['MaxATR'] = round((data['ATR']+data['MaxTR'])/2,2)
     data['MinTR'] = data['TrueRange'].rolling(window=time_period).min().apply(lambda x :round(x,2))
-    # Convert 'Date' column to datetime format
-    data['Date'] = pd.to_datetime(data['Date'], format='%Y%m%d')
+    data['MinATR'] = round((data['ATR']+data['MinTR'])/2,2)
+    if isinstance(data['Date'].iloc[0], str) and '/' in data['Date'].iloc[0]:
+        data['Date'] = pd.to_datetime(data['Date'], format='%Y/%m/%d')
+    else:
+        data['Date'] = pd.to_datetime(data['Date'], format='%Y%m%d')
+    # data['Date'] = pd.to_datetime(data['Date'], format='%Y%m%d')
 
     # 创建图表和子图网格
     fig = plt.figure(figsize=(10, 8))
@@ -45,14 +67,15 @@ if uploaded_file is not None:
     # 第二个子图：ATR 和 True Range
     ax2 = plt.subplot(gs[1], sharex=ax1)  # 共享x轴
     ax2.plot(data['Date'], data['ATR'], label='ATR', color='red', linestyle='--')
-    ax2.plot(data['Date'], data['MaxATR'], label='30% chance', color='yellow', linestyle='--')
+    ax2.plot(data['Date'], data['MaxATR'], label='30% chance', color='pink', linestyle='--')
     ax2.plot(data['Date'], data['MaxTR'], label='maxTR', color='orange', linestyle='--')
+    ax2.plot(data['Date'], data['MinATR'], label='70% chance', color='green', linestyle='--')
     ax2.plot(data['Date'], data['MinTR'], label='minTR', color='blue', linestyle='--')
     ax2.set_ylabel('ATR and TR', color='black')
     ax2.set_xlabel('Time')
     ax2.legend(loc='upper left')  # 添加图例
     # 在每条线的最后一个数据点上添加注释
-    for series in [data['ATR'], data['MaxATR'], data['MaxTR'], data['MinTR']]:
+    for series in [data['ATR'], data['MaxATR'], data['MaxTR'], data['MinATR'], data['MinTR']]:
         ax2.annotate(str(series.iloc[-1]), xy=(mdates.date2num(data['Date'].iloc[-1]), series.iloc[-1]),
                     xytext=(0, -5), textcoords='offset points')
         
@@ -67,5 +90,5 @@ if uploaded_file is not None:
     
 
     # 将结果输出到新的 CSV 文件
-    st.write('生成的数据:')
+    st.write('輸入的數據:')
     st.write(data)  # 显示生成的数据
