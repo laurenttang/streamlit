@@ -10,7 +10,7 @@ st.title('ATR計算與視覺化')
 import base64
 
 password_attempt = st.text_input('Please Enter The Password')
-if password_attempt != 'example_password':
+if password_attempt != 'I love NVIDIA, NVIDIA is great!':
 	st.write('Incorrect Password!')
 	st.stop()
 
