@@ -8,6 +8,12 @@ from mplfinance.original_flavor import candlestick_ohlc
 st.title('ATR計算與視覺化')
 # ======================================================= download ==========
 import base64
+
+password_attempt = st.text_input('Please Enter The Password')
+if password_attempt != 'example_password':
+	st.write('Incorrect Password!')
+	st.stop()
+
 # Creating a sample DataFrame
 sample_data = {'Date': ['20230703'],'Open': [673],'High': [709],'Low': [673],'Close': [709]}
 sample_df = pd.DataFrame(sample_data)
