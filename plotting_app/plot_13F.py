@@ -13,8 +13,8 @@ def plot_comparison_chart(companies, values_period1, values_period2, porpotions_
     bar1 = ax.bar(index, porpotions_period1, bar_width, label='former')
     bar2 = ax.bar(index + bar_width, porpotions_period2, bar_width, label='current', alpha=0.5)
     
-    for i, (bar, prop) in enumerate(zip(bar1, porpotions_period1)):
-        ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height(), f'{prop:.1f}%', ha='center', va='bottom', fontsize=6)
+    #for i, (bar, prop) in enumerate(zip(bar1, porpotions_period1)):
+    #    ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height(), f'{prop:.1f}%', ha='center', va='bottom', fontsize=6)
 
     for i, (bar, prop) in enumerate(zip(bar2, porpotions_period2)):
         ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height(), f'{prop:.1f}%', ha='center', va='bottom', fontsize=6)
