@@ -41,8 +41,8 @@ if uploaded_file is not None:
     data['Company'] = data['Company'].apply(lambda x: x.split(' ')[0] if isinstance(x, str) else x)
     # 假設你有兩個不同期的持股資料
     # Filtering data for period 1 and period 2
-    df_period1 = data[data['date'] == 'period1'].nlargest(10, 'porpotion').sort_values('Value', ascending=False)
-    df_period2 = data[data['date'] == 'period2'].nlargest(10, 'porpotion').sort_values('Value', ascending=False)
+    df_period1 = data[data['date'] == 'former'].nlargest(10, 'porpotion').sort_values('Value', ascending=False)
+    df_period2 = data[data['date'] == 'current'].nlargest(10, 'porpotion').sort_values('Value', ascending=False)
     print(df_period1)
     print(df_period2)
 
@@ -72,8 +72,8 @@ if uploaded_file is not None:
     #data_period2 = {'Company': ['P', 'Q', 'R', 'W', 'Z'],
     #                'Value': [1200, 750, 700, 600, 450],
     #                'porpotion': [1.3, 1.2, 1, 0.71, 0.9]}
-    df_period3 = data[data['date'] == 'period1'].nsmallest(10, 'porpotion').sort_values('Value', ascending=False)
-    df_period4 = data[data['date'] == 'period2'].nsmallest(10, 'porpotion').sort_values('Value', ascending=False)
+    df_period3 = data[data['date'] == 'former'].nsmallest(10, 'porpotion').sort_values('Value', ascending=False)
+    df_period4 = data[data['date'] == 'current'].nsmallest(10, 'porpotion').sort_values('Value', ascending=False)
     print(df_period3)
     print(df_period4)
     # 轉換資料結構，使每個公司的數值分開
