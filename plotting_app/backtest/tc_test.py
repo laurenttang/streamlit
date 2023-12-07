@@ -15,7 +15,8 @@ if uploaded_file is not None:
 
     # 模組化 將訊號運算獨立成檔案 先運算後 吐回df供系統吃買賣訊號
     import df_test
-    history_data=df_test.one_df()
+    t1,t2=2,10
+    history_data=df_test.one_df(t1,t2)
     
     #print(history_data)
     # 初始化 ===============================================================================================
@@ -35,8 +36,7 @@ if uploaded_file is not None:
     tick_price , fees ,  pos = 200,50,0
 
     # 資料處理邏輯 ===============================================================================================
-    t1 = 5
-    t2 = 10
+
     globals()['sma_' + str(t1)] = talib.SMA(history_data["Close"], timeperiod=t1)
     globals()['sma_' + str(t2)] = talib.SMA(history_data["Close"], timeperiod=t2)
     # 計算短期均線減長期均線的值
@@ -45,13 +45,15 @@ if uploaded_file is not None:
     # 紀錄交易矩陣: return 進出場時間、價格、訊號marker、出場算ROI、
     for i in range(len(history_data["Close"])):
         if 1 < i < len(history_data["Close"]):
-            # 如果前天的短期均線低於長期均線時以及昨天的短期均線高於長期均線時(黃金交叉)，並且當前沒有持倉的情況下就以今天的開盤價進行買入
-            # 如果前天的短期均線高於長期均線且昨天的短期均線低於長期均線(死亡交叉)，或今天是最後一天，且在有持倉的情況下，今天就以開盤價的價格賣出
-            condition_in = diff[i - 1] > 0 > diff[i - 2] and pos == 0
-            condition_out = (diff[i - 1] < 0 < diff[i - 2] or i == len(history_data["Close"]) - 1) and pos == 1
+            
+            
+            # 進出場條件的控制
+            condition_in = history_data["condition1"][i] and history_data["condition2"][i] and pos == 0
+            condition_out = history_data["condition3"][i] and history_data["condition4"][i] and pos == 1
             
             if condition_in:
-                buy_date.append(history_data.index[i])
+                #buy_date.append(history_data.index[i])
+                buy_date.append(history_data["Date"][i])
                 buyprice.append(history_data["Open"][i])
 
                 # 開盤價-200的位置紀錄買入訊號點 (改成低點的0.95)
@@ -66,7 +68,7 @@ if uploaded_file is not None:
 
             
             elif condition_out:
-                sell_date.append(history_data.index[i])
+                sell_date.append(history_data["Date"][i])
                 sellprice.append(history_data["Open"][i])
                 # 買進點增加nan
                 up_markers.append(np.nan)
@@ -90,7 +92,7 @@ if uploaded_file is not None:
             ROI.append(np.nan)
             up_markers.append(np.nan)
             down_markers.append(np.nan)
-    
+
     # 統計勝率 迴圈
     for i in range(len(sellprice)):
         if sellprice[i] > buyprice[i]:
@@ -99,7 +101,7 @@ if uploaded_file is not None:
         else:
             losscounts += 1
             losstotal += buyprice[i] - sellprice[i]
-
+    
     # 合併資料 for 分頁設計  
     ROI_value = [x for x in ROI if np.isnan(x) == False]
     equity = [x for x in cashlist][1:] # 取Cashlist初始值之外的序列
@@ -124,10 +126,9 @@ if uploaded_file is not None:
     history_data_page = history_data.iloc[start_idx:end_idx]
     print(history_data_page)
     # 計算均線
-    t1 = 5
-    t2 = 10
-    globals()['sma_' + str(t1)] = talib.SMA(history_data_page["Close"], timeperiod=t1)
-    globals()['sma_' + str(t2)] = talib.SMA(history_data_page["Close"], timeperiod=t2)
+
+    globals()['sma_' + str(t1)] = talib.SMA(history_data_page["GSratio"], timeperiod=t1)
+    globals()['sma_' + str(t2)] = talib.SMA(history_data_page["GSratio"], timeperiod=t2)
 
     # panel 可以決定畫在哪個子圖
     added_plots = {
@@ -142,14 +143,18 @@ if uploaded_file is not None:
                             gridcolor="gray")
     
     
-    history_data_page.index = pd.to_datetime(history_data_page.index)
+    #history_data_page.index = pd.to_datetime(history_data_page.index)
+    history_data_page.index = pd.to_datetime(history_data_page["Date"])
+    print(history_data_page)
     # 畫K線和均線圖
     # Set the figure size when creating the figure
     fig, axes = mpf.plot(history_data_page, type="candle", style=style,
                         addplot=list(added_plots.values()),
                         volume=True,
                         returnfig=True)
-
+    
+    #line_sma_t1 = axes.lines[0]  # Assuming the SMA line is the first line plotted
+    #line_sma_t1.set_linewidth(2)
     # 設定圖例
     axes[0].legend([None] * (len(added_plots) + 2))
     handles = axes[0].get_legend().legendHandles
@@ -158,6 +163,8 @@ if uploaded_file is not None:
     axes[0].set_ylabel("Price")
     axes[2].set_ylabel("Volume")
     axes[4].set_ylabel("ROI")
+    axes[6].set_ylabel("GSratio")
+    
     plt.show()
 
     # 显示图表在 Streamlit 页面上 ==================================================================================
