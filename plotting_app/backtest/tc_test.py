@@ -11,8 +11,13 @@ uploaded_file = st.file_uploader("上传 CSV 文件", type=['csv'])
 
 if uploaded_file is not None:
     # 读取上传的 CSV 文件
-    history_data = pd.read_csv(uploaded_file, index_col="Date", parse_dates=True)
+    #history_data = pd.read_csv(uploaded_file, index_col="Date", parse_dates=True)
 
+    # 模組化 將訊號運算獨立成檔案 先運算後 吐回df供系統吃買賣訊號
+    import df_test
+    history_data=df_test.one_df()
+    
+    #print(history_data)
     # 初始化 ===============================================================================================
     # history_data = pd.read_csv("history_data.csv", index_col="Date", parse_dates=True)
 
@@ -117,16 +122,17 @@ if uploaded_file is not None:
 
     # 繪圖 資料源開始 ===================================================================================================
     history_data_page = history_data.iloc[start_idx:end_idx]
-    
+    print(history_data_page)
     # 計算均線
     t1 = 5
     t2 = 10
     globals()['sma_' + str(t1)] = talib.SMA(history_data_page["Close"], timeperiod=t1)
     globals()['sma_' + str(t2)] = talib.SMA(history_data_page["Close"], timeperiod=t2)
 
+    # panel 可以決定畫在哪個子圖
     added_plots = {
-                "SMA" + str(t1): mpf.make_addplot(globals()['sma_' + str(t1)]),
-                "SMA" + str(t2): mpf.make_addplot(globals()['sma_' + str(t2)]),
+                "SMA" + str(t1): mpf.make_addplot(globals()['sma_' + str(t1)],panel=3),
+                "SMA" + str(t2): mpf.make_addplot(globals()['sma_' + str(t2)],panel=3),
                 "Buy": mpf.make_addplot(history_data_page["up_markers"], type='scatter', marker='^', markersize=10, panel=0),
                 "Sell": mpf.make_addplot(history_data_page["down_markers"], type='scatter', marker='v', markersize=10, panel=0),
                 "ROI": mpf.make_addplot(history_data_page["ROI"], type='scatter', panel=2)
@@ -134,7 +140,9 @@ if uploaded_file is not None:
     # 設定圖表的顏色與網狀格格式
     style = mpf.make_mpf_style(marketcolors=mpf.make_marketcolors(up="r", down="g", inherit=True),
                             gridcolor="gray")
-
+    
+    
+    history_data_page.index = pd.to_datetime(history_data_page.index)
     # 畫K線和均線圖
     # Set the figure size when creating the figure
     fig, axes = mpf.plot(history_data_page, type="candle", style=style,
