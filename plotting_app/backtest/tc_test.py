@@ -1,5 +1,4 @@
 import numpy as np
-import talib
 import pandas as pd
 import matplotlib.pyplot as plt
 import mplfinance as mpf
@@ -37,10 +36,10 @@ if uploaded_file is not None:
 
     # 資料處理邏輯 ===============================================================================================
 
-    globals()['sma_' + str(t1)] = talib.SMA(history_data["Close"], timeperiod=t1)
-    globals()['sma_' + str(t2)] = talib.SMA(history_data["Close"], timeperiod=t2)
+    #globals()['sma_' + str(t1)] = talib.SMA(history_data["Close"], timeperiod=t1)
+    #globals()['sma_' + str(t2)] = talib.SMA(history_data["Close"], timeperiod=t2)
     # 計算短期均線減長期均線的值
-    diff = globals()['sma_' + str(t1)] - globals()['sma_' + str(t2)]
+    #diff = globals()['sma_' + str(t1)] - globals()['sma_' + str(t2)]
 
     # 紀錄交易矩陣: return 進出場時間、價格、訊號marker、出場算ROI、
     for i in range(len(history_data["Close"])):
@@ -127,13 +126,13 @@ if uploaded_file is not None:
     print(history_data_page)
     # 計算均線
 
-    globals()['sma_' + str(t1)] = talib.SMA(history_data_page["GSratio"], timeperiod=t1)
-    globals()['sma_' + str(t2)] = talib.SMA(history_data_page["GSratio"], timeperiod=t2)
+    #globals()['sma_' + str(t1)] = talib.SMA(history_data_page["GSratio"], timeperiod=t1)
+    #globals()['sma_' + str(t2)] = talib.SMA(history_data_page["GSratio"], timeperiod=t2)
 
     # panel 可以決定畫在哪個子圖
     added_plots = {
-                "SMA" + str(t1): mpf.make_addplot(globals()['sma_' + str(t1)],panel=3),
-                "SMA" + str(t2): mpf.make_addplot(globals()['sma_' + str(t2)],panel=3),
+                #"SMA" + str(t1): mpf.make_addplot(globals()['sma_' + str(t1)],panel=3),
+                #"SMA" + str(t2): mpf.make_addplot(globals()['sma_' + str(t2)],panel=3),
                 "Buy": mpf.make_addplot(history_data_page["up_markers"], type='scatter', marker='^', markersize=10, panel=0),
                 "Sell": mpf.make_addplot(history_data_page["down_markers"], type='scatter', marker='v', markersize=10, panel=0),
                 "ROI": mpf.make_addplot(history_data_page["ROI"], type='scatter', panel=2)
